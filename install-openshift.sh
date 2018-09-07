@@ -9,9 +9,10 @@ export DOMAIN=${DOMAIN:="$(curl -s ipinfo.io/ip).nip.io"}
 export USERNAME=${USERNAME:="$(whoami)"}
 export PASSWORD=${PASSWORD:=password}
 export VERSION=${VERSION:="3.10"}
-export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/gshipley/installcentos/master"}
+export SCRIPT_REPO=${SCRIPT_REPO:="https://raw.githubusercontent.com/Richie67/installcentos/master"}
 export IP=${IP:="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"}
 export API_PORT=${API_PORT:="8443"}
+export CONSOLE=${CONSOLE:="console"}
 
 ## Make the script interactive to set the variables
 if [ "$INTERACTIVE" = "true" ]; then
@@ -42,6 +43,11 @@ if [ "$INTERACTIVE" = "true" ]; then
 	read -rp "API Port: ($API_PORT): " choice;
 	if [ "$choice" != "" ] ; then
 		export API_PORT="$choice";
+	fi 
+
+	read -rp "Console Name: ($CONSOLE): " choice;
+	if [ "$choice" != "" ] ; then
+		export CONSOLE="$choice";
 	fi 
 
 	echo
@@ -90,7 +96,7 @@ cd openshift-ansible && git fetch && git checkout release-3.10 && cd ..
 cat <<EOD > /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-${IP}		$(hostname) console console.${DOMAIN}  
+${IP}		$(hostname) ${CONSOLE} ${CONSOLE}.${DOMAIN}  
 EOD
 
 if [ -z $DISK ]; then 
@@ -174,13 +180,13 @@ if [ "$PVS" = "true" ]; then
 fi
 
 echo "******"
-echo "* Your console is https://console.$DOMAIN:$API_PORT"
+echo "* Your console is https://$CONSOLE.$DOMAIN:$API_PORT"
 echo "* Your username is $USERNAME "
 echo "* Your password is $PASSWORD "
 echo "*"
 echo "* Login using:"
 echo "*"
-echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/"
+echo "$ oc login -u ${USERNAME} -p ${PASSWORD} https://$CONSOLE.$DOMAIN:$API_PORT/"
 echo "******"
 
-oc login -u ${USERNAME} -p ${PASSWORD} https://console.$DOMAIN:$API_PORT/
+oc login -u ${USERNAME} -p ${PASSWORD} https://$CONSOLE.$DOMAIN:$API_PORT/
